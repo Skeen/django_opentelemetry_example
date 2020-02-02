@@ -1,0 +1,22 @@
+version: '3'
+
+services:
+  db:
+    image: postgres:11
+    environment:
+      POSTGRES_PASSWORD: secret_password
+    # 5432
+  redis:
+    image: redis:2.8
+    # 6379
+  web:
+    build: .
+    ports:
+      - "8001:8001"
+    depends_on:
+      - db
+      - redis
+  jaeger:
+    image: jaegertracing/all-in-one:1.8
+    ports:
+      - "16686:16686"
