@@ -6,7 +6,7 @@ defined in the ASGI_APPLICATION setting.
 import os
 import django
 from channels.routing import get_default_application
-from django_opentelemetry_example.asgi_middleware import OpenTelemetryMiddleware
+from opentelemetry.ext.asgi import OpenTelemetryMiddleware
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'django_opentelemetry_example.settings')
 django.setup()
@@ -14,7 +14,7 @@ django.setup()
 from pprint import pformat
 
 
-class App():
+class App:
     def __init__(self, scope):
         self.scope = scope
 
@@ -55,6 +55,17 @@ from opentelemetry.ext.psycopg2 import trace_integration
 postgres_tracer = trace.tracer_source().get_tracer('postgres')
 trace_integration(postgres_tracer)
 
-# application = App
-application = get_default_application()
+class DebugMiddleware:
+    def __init__(self, asgi):
+        self.asgi = asgi
+
+    async def __call__(self, scope, receive, send):
+        async def wrapped_send(payload):
+            print(payload)
+            return await send(payload)
+        await self.asgi(scope, receive, wrapped_send)
+
+application = App
+# application = get_default_application()
 application = OpenTelemetryMiddleware(application)
+application = DebugMiddleware(application)
