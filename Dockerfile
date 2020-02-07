@@ -17,6 +17,8 @@ RUN pip install -e opentelemetry-python/ext/opentelemetry-ext-wsgi
 RUN pip install -e opentelemetry-python/ext/opentelemetry-ext-asgi
 RUN pip install requests
 RUN pip install -e opentelemetry-python/ext/opentelemetry-ext-http-requests
+RUN pip install daphne
+RUN pip install gunicorn
 
 COPY . /code/
 
