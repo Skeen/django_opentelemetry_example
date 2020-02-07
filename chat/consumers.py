@@ -34,6 +34,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 'message': message
             }
         )
+        if message == 'Hej':
+            from django.contrib.auth import get_user_model
+            print(get_user_model().objects.all())
 
     # Receive message from room group
     async def chat_message(self, event):

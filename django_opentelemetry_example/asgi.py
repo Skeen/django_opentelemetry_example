@@ -60,12 +60,18 @@ class DebugMiddleware:
         self.asgi = asgi
 
     async def __call__(self, scope, receive, send):
+        async def wrapped_receive():
+            payload = await receive()
+            print(payload)
+            return payload
+
         async def wrapped_send(payload):
             print(payload)
-            return await send(payload)
-        await self.asgi(scope, receive, wrapped_send)
+            return await send(payload)        
+        
+        await self.asgi(scope, wrapped_receive, wrapped_send)
 
-application = App
-# application = get_default_application()
+# application = App
+application = get_default_application()
 application = OpenTelemetryMiddleware(application)
 application = DebugMiddleware(application)
