@@ -1,5 +1,13 @@
 from channels.generic.websocket import AsyncWebsocketConsumer
 import json
+from channels.db import database_sync_to_async
+from django.contrib.auth import get_user_model
+
+
+@database_sync_to_async
+def get_users():
+    return list(get_user_model().objects.all().values_list('username', flat=True))
+
 
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -36,7 +44,15 @@ class ChatConsumer(AsyncWebsocketConsumer):
         )
         if message == 'Hej':
             from django.contrib.auth import get_user_model
-            print(get_user_model().objects.all())
+            users = await get_users()
+            # Send message to room group
+            await self.channel_layer.group_send(
+                self.room_group_name,
+                {
+                    'type': 'chat_message',
+                    'message': ",".join(users)
+                }
+            )
 
     # Receive message from room group
     async def chat_message(self, event):
